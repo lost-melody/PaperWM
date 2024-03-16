@@ -7,8 +7,19 @@ import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
 import * as Util from 'resource:///org/gnome/shell/misc/util.js';
 
 import {
-    Utils, Settings, Gestures, Keybindings, LiveAltTab, Navigator,
-    Stackoverlay, Scratch, Workspace, Tiling, Topbar, Patches, App
+    Utils,
+    Settings,
+    Gestures,
+    Keybindings,
+    LiveAltTab,
+    Navigator,
+    Stackoverlay,
+    Scratch,
+    Workspace,
+    Tiling,
+    Topbar,
+    Patches,
+    App,
 } from './imports.js';
 
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
@@ -48,12 +59,22 @@ import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 export default class PaperWM extends Extension {
     modules = [
-        Utils, Settings, Patches,
-        Gestures, Keybindings, LiveAltTab, Navigator, Stackoverlay, Scratch,
-        Workspace, Tiling, Topbar, App,
+        Utils,
+        Settings,
+        Patches,
+        Gestures,
+        Keybindings,
+        LiveAltTab,
+        Navigator,
+        Stackoverlay,
+        Scratch,
+        Workspace,
+        Tiling,
+        Topbar,
+        App,
     ];
 
-    #userStylesheet = null;
+    #userStylesheet: Gio.File | null = null;
 
     enable() {
         console.log(`#PaperWM enabled`);
@@ -62,7 +83,7 @@ export default class PaperWM extends Extension {
         this.enableUserStylesheet();
 
         // run enable method (with extension argument on all modules)
-        this.modules.forEach(m => {
+        this.modules.forEach((m: any) => {
             if (m['enable']) {
                 m.enable(this);
             }
@@ -72,7 +93,7 @@ export default class PaperWM extends Extension {
     disable() {
         console.log('#PaperWM disabled');
         this.prepareForDisable();
-        [...this.modules].reverse().forEach(m => {
+        [...this.modules].reverse().forEach((m: any) => {
             if (m['disable']) {
                 m.disable();
             }
@@ -102,11 +123,11 @@ export default class PaperWM extends Extension {
     }
 
     hasUserConfigFile() {
-        return this.getConfigDir().get_child("user.js").query_exists(null);
+        return this.getConfigDir().get_child('user.js').query_exists(null);
     }
 
     hasUserStyleFile() {
-        return this.getConfigDir().get_child("user.css").query_exists(null);
+        return this.getConfigDir().get_child('user.css').query_exists(null);
     }
 
     /**
@@ -123,16 +144,16 @@ export default class PaperWM extends Extension {
         const configDir = this.getConfigDir();
 
         try {
-            const metadata = this.dir.get_child("metadata.json");
-            metadata.copy(configDir.get_child("metadata.json"), Gio.FileCopyFlags.OVERWRITE, null, null);
+            const metadata = this.dir.get_child('metadata.json');
+            metadata.copy(configDir.get_child('metadata.json'), Gio.FileCopyFlags.OVERWRITE, null, null);
         } catch (error) {
             console.error('PaperWM', `could not update user config metadata.json: ${error}`);
         }
 
         if (!this.hasUserStyleFile()) {
             try {
-                const user = this.dir.get_child("config/user.css");
-                user.copy(configDir.get_child("user.css"), Gio.FileCopyFlags.NONE, null, null);
+                const user = this.dir.get_child('config/user.css');
+                user.copy(configDir.get_child('user.css'), Gio.FileCopyFlags.NONE, null, null);
             } catch (error) {
                 console.error('PaperWM', `could not update user config metadata.json: ${error}`);
             }
@@ -153,14 +174,14 @@ export default class PaperWM extends Extension {
                 this.installConfig();
 
                 const configDir = this.getConfigDir().get_path();
-                const notification = this.notify("PaperWM", `Created user configuration folder: ${configDir}`);
+                const notification = this.notify('PaperWM', `Created user configuration folder: ${configDir}`);
                 notification.connect('activated', () => {
-                    Util.spawn(["nautilus", configDir]);
+                    Util.spawn(['nautilus', configDir]);
                     notification.destroy();
                 });
-            } catch (e) {
-                this.errorNotification("PaperWM", `Failed create user configuration folder: ${e.message}`, e.stack);
-                console.error("PaperWM", "User config install failed", e.message);
+            } catch (e: any) {
+                this.errorNotification('PaperWM', `Failed create user configuration folder: ${e.message}`, e.stack);
+                console.error('PaperWM', 'User config install failed', e.message);
             }
         }
 
@@ -188,9 +209,9 @@ export default class PaperWM extends Extension {
      * Reloads user.css styles (if user.css present in ~/.config/paperwm).
      */
     enableUserStylesheet() {
-        this.#userStylesheet = this.getConfigDir().get_child("user.css");
+        this.#userStylesheet = this.getConfigDir().get_child('user.css');
         if (this.#userStylesheet.query_exists(null)) {
-            let themeContext = St.ThemeContext.get_for_stage(global.stage);
+            let themeContext = St.ThemeContext.get_for_stage(global.stage.get_stage());
             themeContext.get_theme().load_stylesheet(this.#userStylesheet);
         }
     }
@@ -199,8 +220,8 @@ export default class PaperWM extends Extension {
      * Unloads user.css styles (if user.css present in ~/.config/paperwm).
      */
     disableUserStylesheet() {
-        let themeContext = St.ThemeContext.get_for_stage(global.stage);
-        themeContext.get_theme().unload_stylesheet(this.#userStylesheet);
+        let themeContext = St.ThemeContext.get_for_stage(global.stage.get_stage());
+        themeContext.get_theme().unload_stylesheet(this.#userStylesheet!);
         this.#userStylesheet = null;
     }
 
@@ -208,8 +229,8 @@ export default class PaperWM extends Extension {
      * Our own version of imports.ui.main.notify allowing more control over the
      * notification
      */
-    notify(msg, details, params) {
-        let source = new MessageTray.SystemNotificationSource();
+    notify(msg: string, details: string, params?: MessageTray.Notification.Params) {
+        let source = new MessageTray.SystemNotificationSource('', '');
         // note-to-self: the source is automatically destroyed when all its
         // notifications are removed.
         Main.messageTray.add(source);
@@ -219,19 +240,19 @@ export default class PaperWM extends Extension {
         return notification;
     }
 
-    spawnPager(content) {
+    spawnPager(content: string) {
         const quoted = GLib.shell_quote(content);
-        Util.spawn(["sh", "-c", `echo -En ${quoted} | gedit --new-window -`]);
+        Util.spawn(['sh', '-c', `echo -En ${quoted} | gedit --new-window -`]);
     }
 
     /**
      * Show an notification opening a the full message in dedicated window upon
      * activation
      */
-    errorNotification(title, message, fullMessage) {
+    errorNotification(title: string, message: string, fullMessage: string) {
         const notification = this.notify(title, message);
         notification.connect('activated', () => {
-            this.spawnPager([title, message, "", fullMessage].join("\n"));
+            this.spawnPager([title, message, '', fullMessage].join('\n'));
             notification.destroy();
         });
     }
