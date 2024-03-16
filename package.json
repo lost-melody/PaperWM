@@ -1,0 +1,22 @@
+{
+  "name": "PaperWM",
+  "version": "0.0.0",
+  "description": "Tiling window manager with a twist",
+  "type": "module",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paperwm/PaperWM"
+  },
+  "author": "hedning <https://github.com/hedning>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/paperwm/PaperWM/issues"
+  },
+  "homepage": "https://github.com/paperwm/PaperWM#readme",
+  "sideEffects": false,
+  "dependencies": {
+    "@girs/gjs": "^3.2.9",
+    "@girs/gnome-shell": "^45.0.0-beta9"
+  }
+}
