@@ -8,5 +8,18 @@
     let pkgs = import nixpkgs { inherit system; };
     in
     { packages.default = pkgs.callPackage ./default.nix {};
+      packages.vm = self.nixosConfigurations.testbox.config.system.build.vm;
+
+      nixosConfigurations."testbox" =
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = [
+            ./vm.nix
+            { nixpkgs.overlays = [
+                (self: super: { paperwm = self.packages.${system}.default; })
+              ];
+            }
+          ];
+        };
     });
 }
