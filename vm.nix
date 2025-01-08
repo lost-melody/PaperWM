@@ -13,6 +13,7 @@
     { enable = true;
       user = "user";
     };
+    displayManager.gdm.enable = true;
     desktopManager.gnome.enable = true;
   };
 

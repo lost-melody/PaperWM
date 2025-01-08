@@ -8,18 +8,25 @@
     let pkgs = import nixpkgs { inherit system; };
     in
     { packages.default = pkgs.callPackage ./default.nix {};
-      packages.vm = self.nixosConfigurations.testbox.config.system.build.vm;
-
+      packages.vm = let hostConfig = self.nixosConfigurations.testbox.config;
+                        localConfig = hostConfig // {
+                          virtualisation = hostConfig.virtualisation // {
+                            host.pkgs = pkgs;   # Use host system's Qemu
+                          };
+                        };
+                     in localConfig.system.build.vm;
+    }) // {
       nixosConfigurations."testbox" =
-        nixpkgs.lib.nixosSystem {
+        let system = "x86_64-linux";
+        in nixpkgs.lib.nixosSystem {
           inherit system;
           modules = [
             ./vm.nix
             { nixpkgs.overlays = [
-                (self: super: { paperwm = self.packages.${system}.default; })
+                (s: super: { paperwm = self.packages.${system}.default; })
               ];
             }
           ];
         };
-    });
+    };
 }
